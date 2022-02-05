@@ -24,15 +24,15 @@ const userSchema = new Schema({
  },
  picture_url: {
   type: String,
-  default: "https://res.cloudinary.com/codehackerone/image/upload/v1620454218/default_dp_ubrfcg.jpg"
+  default: "https://res.cloudinary.com/codehackerone/image/upload/v1620454218/default_dp_ubrfcg.jpg",
+  required: true
  },
  phoneNumber: {
   type: Number,
   unique: true
  },
  favorites: [{
-  type: String,
-  unique: true
+  type: String
  }]
 }, {
  timestamps: true
