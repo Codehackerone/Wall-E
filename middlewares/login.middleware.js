@@ -1,5 +1,5 @@
 const jwt= require('jsonwebtoken');
-const User= require('../models/user.model');
+const User= require('../models/user.models');
 
 const auth = async (req, res, next) => {
  try {
@@ -18,3 +18,5 @@ const auth = async (req, res, next) => {
      res.status(401).send({ error: true, message: "User has not authenticated." })
  }
 }
+
+module.exports= auth;

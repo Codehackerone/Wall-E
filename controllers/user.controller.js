@@ -1,25 +1,25 @@
-const User= require('../models/user.model');
-const bcrypt= require("bcrypt");
-const jwt= require('jsonwebtoken');
+const User = require('../models/user.models');
+const bcrypt = require("bcrypt");
+const jwt = require('jsonwebtoken');
 
-exports.getProfile = async (req, res) => {
+const getProfile = async (req, res) => {
     res.send(req.user);
 }
 
-exports.getFavorites = async (req, res) => {
+const getFavorites = async (req, res) => {
     res.send(req.user.favorites);
 }
 
-exports.signup = async (req, res) => {
+const signup = async (req, res) => {
     const { name, userName, email, password, phoneNumber } = req.body;
-    const data= await User.findOne({ userName, email });
+    const data = await User.findOne({ userName, email });
 
     if (data) {
-     return res.status(400).send({ error: true, message: "User already exists." });
+        return res.status(400).send({ error: true, message: "User already exists." });
     }
 
-    if(!phoneNumber) {
-     phoneNumber= "-";
+    if (!phoneNumber) {
+        phoneNumber = "-";
     }
 
     const user = new User({ name, userName, email, password, phoneNumber });
@@ -28,19 +28,19 @@ exports.signup = async (req, res) => {
         await user.save();
         res.send({ error: false, user });
     } catch (e) {
-        res.status(400).send({error: true, message: e.message});
+        res.status(400).send({ error: true, message: e.message });
     }
 }
 
-exports.login = async (req, res) => {
+const login = async (req, res) => {
     const { userName, password, phoneNumber } = req.body;
-    const user= {}
+    const user = {}
 
-    if(!phoneNumber) {
-    user = await User.findOne({ userName });
+    if (!phoneNumber) {
+        user = await User.findOne({ userName });
     }
     else {
-    user = await User.findOne({ phoneNumber });
+        user = await User.findOne({ phoneNumber });
     }
 
     if (!user) {
@@ -58,30 +58,34 @@ exports.login = async (req, res) => {
     res.send({ error: false, token });
 }
 
-// FINISH UPDATE CONTROLLER
+const update = async (req, res) => {
+    const updates= Object.keys(req.body);
+    
+    if(!updates){
+        return res.status(400).send({ error: true, message: "No updates to be made." });
+    }
 
-// exports.update = async (req, res) => {
-//     const { name, userName, email, password, phoneNumber } = req.body;
-//     const user= await User.findOne({ _id: req.user._id });
+    const allowedUpdates= ["name", "userName", "email", "password", "phoneNumber"];
+    const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
 
-//     if(!phoneNumber) {
-//     user.name= name;
-//     user.userName= userName;
-//     user.email= email;
-//     user.password= password;
-//     }
-//     else {
-//     user.name= name;
-//     user.userName= userName;
-//     user.email= email;
-//     user.password= password;
-//     user.phoneNumber= phoneNumber;
-//     }
+    if (!isValidOperation) {
+        return res.status(400).send({ error:true, message: 'Invalid updates!' })
+    }
 
-//     try {
-//         await user.save();
-//         res.send({ error: false, user });
-//     } catch (e) {
-//         res.status(400).send({error: true, message: e.message});
-//     }
-// }
+    
+    try {
+        updates.forEach((update) => req.user[update] = req.body[update])
+        await req.user.save()
+        res.send(req.user)
+    } catch (e) {
+        res.status(400).send(e)
+    }
+}
+
+module.exports= {
+    getProfile,
+    getFavorites,
+    signup,
+    login,
+    update
+}
